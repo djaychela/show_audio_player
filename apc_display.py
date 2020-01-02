@@ -37,6 +37,10 @@ print("Fonts initialized!")
 
 # button class for midi io and audio playback
 class button:
+    """Class for buttons on APC controller, with MIDI note numbers, 
+    audio file and states, with methods for state setting and getting
+    and playing of audio files"""
+
     def __init__(self, note_number, audio_file, state=False):
         self.note_number = note_number
         if isinstance(state, bool):
@@ -46,14 +50,20 @@ class button:
         self.audio_file = audio_file
         self.channel = self.note_number % 8
         self.friendly_name = audio_file.split("/")[-1][:-4]
+        if self.friendly_name == "dummy":
+            self.friendly_name = ""
 
     def set_state(self, state):
+        """ Set state of button using bools"""
+
         if isinstance(state, bool):
             self.state = state
             self.midi_output()
             self.audio_output()
 
     def toggle_state(self):
+        """ Toggle the state to the opposite of current state."""
+
         self.state = not self.state
         self.midi_output()
         self.audio_output()
@@ -65,6 +75,8 @@ class button:
         pass
 
     def midi_output(self):
+        """ Performs MIDI output to illuminate APC buttons to reflect state."""
+
         if self.state:
             velocity = 127
         else:
@@ -73,6 +85,7 @@ class button:
         outport.send(out_msg)
 
     def audio_output(self):
+        """ Plays audio on the relevant channel."""
         if self.state:
             self.audio = pygame.mixer.Sound(self.audio_file)
             pygame.mixer.Channel(self.note_number).play(self.audio)
@@ -83,41 +96,9 @@ class button:
                 pass
 
 
-class playlist_button:
-    def __init__(self, note_number, audio_file, state=False):
-        self.note_number = note_number
-        if isinstance(state, bool):
-            self.state = state
-        else:
-            self.state = False
-        self.audio_file = audio_file
-        self.channel = self.note_number % 8
-        self.friendly_name = audio_file.split("/")[-1][:-4]
-
-    def set_state(self, state):
-        if isinstance(state, bool):
-            self.state = state
-            self.midi_output()
-            self.audio_output()
-
-    def toggle_state(self):
-        self.state = not self.state
-        self.midi_output()
-        self.audio_output()
-
-    def get_state(self):
-        return self.state
-
-    def output_state(self):
-        pass
-
-    def midi_output(self):
-        if self.state:
-            velocity = 127
-        else:
-            velocity = 0
-        out_msg = mido.Message("note_on", note=self.note_number, velocity=velocity)
-        outport.send(out_msg)
+class playlist_button(button):
+    """ Subclass of button, with altered audio output to allow
+    use of MP3 files for soundtracks """
 
     def audio_output(self):
         if self.state:
