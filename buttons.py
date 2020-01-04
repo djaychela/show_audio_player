@@ -7,6 +7,10 @@ import json
 from mutagen.mp3 import MP3
 from mutagen import MutagenError
 
+# initialise the midi input and output
+inport = mido.open_input("APC MINI")
+outport = mido.open_output("APC MINI")
+
 # button class for midi io and audio playback
 class Button:
     """Class for buttons on APC controller, with MIDI note numbers, 

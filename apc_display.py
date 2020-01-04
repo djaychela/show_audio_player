@@ -73,10 +73,13 @@ def draw_button(x_loc, y_loc, button_size, percentage, name, state):
             screen.blit(text, (x_loc + 3, y_loc + 3))
             name = " ".join(name.split()[1:])
             offset = 25
-    # TODO: handle '-' splits, etc, better.
+    # rest of text written as new lines
     if len(name) > 0:
-        text = tinyArial.render(name, True, WHITE)
-        screen.blit(text, (x_loc + 3, y_loc + 3 + offset))
+        for t in name.split()[:3]:
+            if t != '-':
+                text = tinyArial.render(t, True, WHITE)
+                screen.blit(text, (x_loc + 3, y_loc + 3 + offset))
+                offset += 15
 
 
 def load_config_data(config_file):
