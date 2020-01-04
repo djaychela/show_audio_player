@@ -4,12 +4,20 @@ import pygame
 import os
 import json
 
+from buttons import Button, PlaylistButton
+
 # some variables
 config_file = "config.json"
 button_size = 70
+warning_limit = 0.9
+current_sample_set = 1
+
+# colours for display
 BLACK = (0, 0, 0)
 GREY = (80, 80, 80)
 WHITE = (255, 255, 255)
+GREEN = (0, 255, 0)
+RED = (255, 0, 0)
 FPS = 30
 
 # initialise the midi input and output
@@ -19,7 +27,7 @@ outport = mido.open_output("APC MINI")
 # initialise pygame display
 pygame.init()
 pygame.display.set_caption("Audio Player")
-screen = pygame.display.set_mode((1024, 800))
+screen = pygame.display.set_mode((1024, 840))
 clock = pygame.time.Clock()
 
 
@@ -35,111 +43,105 @@ medArial = pygame.font.SysFont("arial", 40)
 largeArial = pygame.font.SysFont("arial", 65)
 print("Fonts initialized!")
 
-# button class for midi io and audio playback
-class button:
-    """Class for buttons on APC controller, with MIDI note numbers, 
-    audio file and states, with methods for state setting and getting
-    and playing of audio files"""
 
-    def __init__(self, note_number, audio_file, state=False):
-        self.note_number = note_number
-        if isinstance(state, bool):
-            self.state = state
+def draw_button(x_loc, y_loc, button_size, percentage, name, state):
+
+    pygame.draw.rect(screen, WHITE, (x_loc, y_loc, button_size, button_size))
+    if state:
+        pygame.draw.rect(
+            screen, GREY, (x_loc + 2, y_loc + 2, button_size - 4, button_size - 4)
+        )
+        if percentage < warning_limit:
+            color = GREEN
         else:
-            self.state = False
-        self.audio_file = audio_file
-        self.channel = self.note_number % 8
-        self.friendly_name = audio_file.split("/")[-1][:-4]
-        if self.friendly_name == "dummy":
-            self.friendly_name = ""
-
-    def set_state(self, state):
-        """ Set state of button using bools"""
-
-        if isinstance(state, bool):
-            self.state = state
-            self.midi_output()
-            self.audio_output()
-
-    def toggle_state(self):
-        """ Toggle the state to the opposite of current state."""
-
-        self.state = not self.state
-        self.midi_output()
-        self.audio_output()
-
-    def get_state(self):
-        return self.state
-
-    def output_state(self):
-        pass
-
-    def midi_output(self):
-        """ Performs MIDI output to illuminate APC buttons to reflect state."""
-
-        if self.state:
-            velocity = 127
-        else:
-            velocity = 0
-        out_msg = mido.Message("note_on", note=self.note_number, velocity=velocity)
-        outport.send(out_msg)
-
-    def audio_output(self):
-        """ Plays audio on the relevant channel."""
-        if self.state:
-            self.audio = pygame.mixer.Sound(self.audio_file)
-            pygame.mixer.Channel(self.note_number).play(self.audio)
-        else:
-            try:
-                self.audio.fadeout(500)
-            except:
-                pass
+            color = RED
+        pygame.draw.rect(
+            screen,
+            color,
+            (x_loc + 2, y_loc + button_size - 10, ((button_size - 4) * percentage), 8),
+        )
+    else:
+        pygame.draw.rect(
+            screen, BLACK, (x_loc + 2, y_loc + 2, button_size - 4, button_size - 4)
+        )
+    
+    # handling of Q numbers to be larger in buttons
+    offset = 0
+    if len(name) > 0:
+        if name.split()[0][0] == "Q":
+            text = medArial.render(name.split()[0], True, WHITE)
+            screen.blit(text, (x_loc + 3, y_loc + 3))
+            name = " ".join(name.split()[1:])
+            offset = 25
+    # TODO: handle '-' splits, etc, better.
+    if len(name) > 0:
+        text = tinyArial.render(name, True, WHITE)
+        screen.blit(text, (x_loc + 3, y_loc + 3 + offset))
 
 
-class playlist_button(button):
-    """ Subclass of button, with altered audio output to allow
-    use of MP3 files for soundtracks """
-
-    def audio_output(self):
-        if self.state:
-            self.audio = pygame.mixer.music.load(self.audio_file)
-            pygame.mixer.music.play()
-        else:
-            try:
-                pygame.mixer.music.fadeout(1000)
-            except:
-                pass
+def load_config_data(config_file):
+    config_path = os.path.join(os.getcwd(), "config", config_file)
+    with open(config_path, "r") as f:
+        config_data = f.read()
+    return config_data
 
 
-# import files from json config file #
-config_path = os.path.join(os.getcwd(), "config", config_file)
-with open(config_path, "r") as f:
-    config_data = f.read()
+def parse_config_data(config_data, current_sample_set):
+    pages_dict = {}
+    config_info = json.loads(config_data)
+    for page in config_info["PageData"]:
+        pages_dict[page["PageNumber"]] = page["PageName"]
+        if page["PageNumber"] == current_sample_set:
+            page_name = page["PageName"]
+            samples_list = []
+            for idx in range(8):
+                for sample in page["Samples"][str(idx)]:
+                    samples_list.append(sample)
 
-# print(config_data)
-config_info = json.loads(config_data)
-for page in config_info["PageData"]:
-    if page["PageNumber"] == 1:
-        samples_list = []
-        for idx in range(8):
-            for sample in page["Samples"][str(idx)]:
-                samples_list.append(sample)
+    soundtrack_list = config_info["SoundtrackList"]
+
+    return samples_list, soundtrack_list, pages_dict, page_name
+
+
+def load_buttons():
+    for idx in range(64):
+        file_path = os.path.join(os.getcwd(), "audio", samples_list[idx])
+        buttons[idx] = Button(idx, file_path, False)
+
+
+def load_playlist_buttons():
+    for idx in range(82, 90):
+        file_path = os.path.join(os.getcwd(), "playlists", soundtrack_list[idx - 82])
+        buttons[idx] = PlaylistButton(idx, file_path, False)
+
+
+def turn_off_other_soundtracks(note):
+    for idx in range(82, 90):
+        if idx != note:
+            buttons[idx].set_state(False)
+
+
+# various lists
+channels = [100 for _ in range(9)]
+prev_state = [0 for _ in range(90)]
+current_state = [0 for _ in range(90)]
+buttons = [None for _ in range(90)]
+index_1 = [idx for idx in range(64)]
+index_2 = [idx for idx in range(82, 90)]
+indexes = index_1 + index_2
+
+# initial setup
+config_data = load_config_data(config_file)
+samples_list, soundtrack_list, pages_dict, page_name = parse_config_data(
+    config_data, current_sample_set
+)
+
 
 # initialise buttons
-buttons = []
-for idx in range(63):
-    file_path = os.path.join(os.getcwd(), "audio", samples_list[idx])
-    buttons.append(button(idx, file_path, False))
-for idx in range(63, 82):
-    file_path = os.path.join(os.getcwd(), "audio", "dummy.wav")
-    buttons.append(button(idx, file_path, False))
-for idx in range(82, 90):
-    file_path = os.path.join(os.getcwd(), "playlists", "underscore.mp3")
-    buttons.append(playlist_button(idx, file_path, False))
 
-channels = [0 for _ in range(9)]
-prev_state = [0 for _ in range(99)]
-current_state = [0 for _ in range(99)]
+load_buttons()
+load_playlist_buttons()
+
 
 while True:
     clock.tick(FPS)
@@ -148,75 +150,89 @@ while True:
         # perform actions depending on message type
         if msg.type == "note_on":
             # TODO: correct button number filtering
-            if msg.note <= 63 or msg.note >= 82:
+            if msg.note <= 63:
                 buttons[msg.note].toggle_state()
-
+            if 81 < msg.note < 90:
+                turn_off_other_soundtracks(msg.note)
+                buttons[msg.note].toggle_state()
         elif msg.type == "control_change":
             channels[msg.control - 48] = msg.value
 
     # display update loop
-    for idx in range(99):
-        # TODO: doesn't work for soundtrack buttons
-        current_state[idx] = pygame.mixer.Channel(idx).get_busy()
+    for idx in indexes:
+        if 81 < idx < 90:
+            current_state[idx] = buttons[idx].get_state()
+        else:
+            current_state[idx] = pygame.mixer.Channel(idx).get_busy()
         if current_state[idx] != prev_state[idx]:
-            if current_state[idx] == 0:
-                buttons[idx].set_state(False)
-            prev_state[idx] = current_state
+            if idx <= 81:
+                if current_state[idx] == 0:
+                    buttons[idx].set_state(False)
+                prev_state[idx] = current_state
 
-    for event in pygame.event.get():
-        if event.type == pygame.QUIT:
-            quit()
+    # set volumes
+    for c in range(64):
+        volume = channels[c % 8] / 127
+        pygame.mixer.Channel(c).set_volume(volume)
+    pygame.mixer.music.set_volume(channels[8] / 127)
 
     # screen display
     screen.fill(BLACK)
 
-    # display items
-    # current sample set
-    # widgets for playback channels
-    # widget for mp3 playback
-    # TODO: soundtrack buttons mutually exclusive
+    # TODO: display items
+    # TODO: current sample set
+    # TODO: load different sample set (keys 1-9)
     # TODO: selection of grid buttons from keyboard
     # TODO: display of current sound set on screen
+    # TODO: turn off button at the end of soundtrack playback...
+    # TODO: error handling for missing files
+    # TODO: Large Q labels for Q samples.
 
-    # pad display
+    # text display of current sample set
+    text = largeArial.render(page_name, True, WHITE)
+    screen.blit(text, (200, 10))
+
+    # sample pages name display
+    x_loc = 800
+    y_loc = 60
+    for idx, (k, v) in enumerate(pages_dict.items()):
+        text = smallArial.render(f"{idx+1}: {v}", True, WHITE)
+        screen.blit(text, (x_loc, y_loc + (30 * idx)))
+
+    # button display
     for idx, c in enumerate(buttons[:64]):
 
         x_loc = 20 + ((idx % 8) * (button_size + 10))
-        y_loc = 20 + (button_size + 10) * 7 - ((idx // 8) * (button_size + 10))
-        pygame.draw.rect(screen, WHITE, (x_loc, y_loc, button_size, button_size))
-        if current_state[idx]:
-            pygame.draw.rect(
-                screen, GREY, (x_loc + 2, y_loc + 2, button_size - 4, button_size - 4)
-            )
-        else:
-            pygame.draw.rect(
-                screen, BLACK, (x_loc + 2, y_loc + 2, button_size - 4, button_size - 4)
-            )
-        text = tinyArial.render(buttons[idx].friendly_name, True, WHITE)
-        screen.blit(text, (x_loc + 3, y_loc + 3))
+        y_loc = 60 + (button_size + 10) * 7 - ((idx // 8) * (button_size + 10))
+
+        draw_button(
+            x_loc,
+            y_loc,
+            button_size,
+            buttons[idx].percentage_played(),
+            buttons[idx].friendly_name,
+            current_state[idx],
+        )
 
     # playlist button display
     for idx, c in enumerate(buttons[82:90]):
 
         x_loc = 20 + (8 * (button_size + 10))
-        y_loc = 20 + (idx * (button_size + 10))
-        pygame.draw.rect(screen, WHITE, (x_loc, y_loc, button_size, button_size))
-        # TODO: this bit doesn't work!
-        if current_state[idx + 82]:
-            pygame.draw.rect(
-                screen, GREY, (x_loc + 2, y_loc + 2, button_size - 4, button_size - 4)
-            )
-        else:
-            pygame.draw.rect(
-                screen, BLACK, (x_loc + 2, y_loc + 2, button_size - 4, button_size - 4)
-            )
-        text = tinyArial.render(buttons[idx + 82].friendly_name, True, WHITE)
-        screen.blit(text, (x_loc + 3, y_loc + 3))
+        y_loc = 60 + (idx * (button_size + 10))
 
-    # volume slider code
+        draw_button(
+            x_loc,
+            y_loc,
+            button_size,
+            buttons[idx + 82].percentage_played(),
+            buttons[idx + 82].friendly_name,
+            current_state[idx + 82],
+        )
+
+    # volume slider display
     for idx, c in enumerate(channels):
         x_loc = 20 + (idx * (button_size + 10))
-        y_loc = 680
+        y_loc = 720
         pygame.draw.rect(screen, WHITE, (x_loc, y_loc, button_size, 100))
         pygame.draw.rect(screen, BLACK, (x_loc + 2, y_loc + 2, button_size - 4, 96))
         pygame.draw.rect(
@@ -224,5 +240,17 @@ while True:
         )
 
     time.sleep(0.05)
+
+    # key handling
+    for event in pygame.event.get():
+        if event.type == pygame.QUIT:
+            quit()
+        if event.type == pygame.KEYDOWN:
+            if 49 <= event.key <= 57:
+                current_sample_set = event.key - 48
+            samples_list, soundtrack_list, pages_dict, page_name = parse_config_data(
+                config_data, current_sample_set
+            )
+            load_buttons()
 
     pygame.display.update()
