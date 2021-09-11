@@ -8,8 +8,16 @@ from mutagen.mp3 import MP3
 from mutagen import MutagenError
 
 # initialise the midi input and output
-inport = mido.open_input("APC MINI")
-outport = mido.open_output("APC MINI")
+try:
+    inport = mido.open_input("APC MINI")
+except OSError:
+    inport = mido.open_input(mido.get_input_names()[0])
+    
+try:
+    outport = mido.open_output("APC MINI")
+except OSError:
+    outport = mido.open_output(mido.get_output_names()[0])
+
 
 # button class for midi io and audio playback
 class Button:

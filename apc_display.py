@@ -5,6 +5,7 @@ import os
 import json
 
 from buttons import Button, PlaylistButton
+from json_tools import load_config_data, parse_config_data
 
 # some variables
 config_file = "config.json"
@@ -21,8 +22,17 @@ RED = (255, 0, 0)
 FPS = 30
 
 # initialise the midi input and output
-inport = mido.open_input("APC MINI")
-outport = mido.open_output("APC MINI")
+
+try:
+    inport = mido.open_input("APC MINI")
+except OSError:
+    inport = mido.open_input(mido.get_input_names()[0])
+
+try:
+    outport = mido.open_output("APC MINI")
+except OSError:
+    outport = mido.open_output(mido.get_output_names()[0])
+
 
 # initialise pygame display
 pygame.init()
@@ -82,34 +92,14 @@ def draw_button(x_loc, y_loc, button_size, percentage, name, state):
                 offset += 15
 
 
-def load_config_data(config_file):
-    config_path = os.path.join(os.getcwd(), "config", config_file)
-    with open(config_path, "r") as f:
-        config_data = f.read()
-    return config_data
-
-
-def parse_config_data(config_data, current_sample_set):
-    pages_dict = {}
-    config_info = json.loads(config_data)
-    for page in config_info["PageData"]:
-        pages_dict[page["PageNumber"]] = page["PageName"]
-        if page["PageNumber"] == current_sample_set:
-            page_name = page["PageName"]
-            samples_list = []
-            for idx in range(8):
-                for sample in page["Samples"][str(idx)]:
-                    samples_list.append(sample)
-
-    soundtrack_list = config_info["SoundtrackList"]
-
-    return samples_list, soundtrack_list, pages_dict, page_name
-
-
 def load_buttons():
+    dummy_file_path = os.path.join(os.getcwd(), "audio", "dummy.wav")
     for idx in range(64):
         file_path = os.path.join(os.getcwd(), "audio", samples_list[idx])
-        buttons[idx] = Button(idx, file_path, False)
+        try:
+            buttons[idx] = Button(idx, file_path, False)
+        except FileNotFoundError:
+            buttons[idx] = Button(idx, dummy_file_path, False)
 
 
 def load_playlist_buttons():
@@ -182,13 +172,9 @@ while True:
     # screen display
     screen.fill(BLACK)
 
-    # TODO: display items
-    # TODO: current sample set
-    # TODO: load different sample set (keys 1-9)
     # TODO: selection of grid buttons from keyboard
     # TODO: display of current sound set on screen
     # TODO: turn off button at the end of soundtrack playback...
-    # TODO: error handling for missing files
     # TODO: Large Q labels for Q samples.
 
     # text display of current sample set
