@@ -147,3 +147,5 @@ media/fifty_images/*
 db_bu/
 audio/
 playlists/
+html_output/bootstrap/
+html_output/*
