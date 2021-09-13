@@ -7,7 +7,7 @@
                 "0": [
                     "Q12 - German - Radio.wav",
                     "missing.wav",
-                    "Q12 - German - Radio.wav",
+                    "Test_rec_1.ogg",
                     "Q12 - German - Radio.wav",
                     "dummy.wav",
                     "dummy.wav",
@@ -776,12 +776,12 @@
         }
     ],
     "SoundtrackList": [
-        "Playlist 1.mp3",
-        "Playlist 2.mp3",
-        "Playlist 3.mp3",
-        "Playlist 4.mp3",
-        "Playlist 5.mp3",
-        "underscore.mp3",
+        "Playlist 1 2021.mp3",
+        "Playlist 2 2021.mp3",
+        "Playlist 3 2021.mp3",
+        "Playlist 4 2021.mp3",
+        "Playlist 5 2021.mp3",
+        "Playlist 6 2021.mp3",
         "underscore.mp3",
         "underscore.mp3"
     ]

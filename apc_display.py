@@ -19,7 +19,7 @@ GREY = (80, 80, 80)
 WHITE = (255, 255, 255)
 GREEN = (0, 255, 0)
 RED = (255, 0, 0)
-FPS = 30
+FPS = 15
 
 # initialise the midi input and output
 
@@ -113,6 +113,12 @@ def turn_off_other_soundtracks(note):
         if idx != note:
             buttons[idx].set_state(False)
 
+def load_config():
+    config_data = load_config_data(config_file)
+    samples_list, soundtrack_list, pages_dict, page_name = parse_config_data(
+        config_data, current_sample_set
+    )
+    return samples_list, soundtrack_list, pages_dict, page_name, config_data
 
 # various lists
 channels = [100 for _ in range(9)]
@@ -123,17 +129,11 @@ index_1 = [idx for idx in range(64)]
 index_2 = [idx for idx in range(82, 90)]
 indexes = index_1 + index_2
 
-# initial setup
-config_data = load_config_data(config_file)
-samples_list, soundtrack_list, pages_dict, page_name = parse_config_data(
-    config_data, current_sample_set
-)
-
-
-# initialise buttons
-
+# initialisation of buttons
+samples_list, soundtrack_list, pages_dict, page_name, config_data = load_config()
 load_buttons()
 load_playlist_buttons()
+
 
 
 while True:
@@ -228,7 +228,7 @@ while True:
             screen, GREY, (x_loc + 2, y_loc + 78 - int(c / 1.67), button_size - 4, 20)
         )
 
-    time.sleep(0.05)
+    time.sleep(0.1)
 
     # key handling
     for event in pygame.event.get():
@@ -241,5 +241,7 @@ while True:
                 config_data, current_sample_set
             )
             load_buttons()
+            if event.key == pygame.K_u:
+                samples_list, soundtrack_list, pages_dict, page_name, config_data = load_config()
 
     pygame.display.update()
