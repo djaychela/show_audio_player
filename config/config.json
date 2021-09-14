@@ -5,14 +5,14 @@
             "PageName": "Samples 1",
             "Samples": {
                 "0": [
-                    "Q12 - German - Radio.wav",
-                    "missing.wav",
-                    "Test_rec_1.ogg",
-                    "Q12 - German - Radio.wav",
+                    "007 theme.wav",
+                    "Welcome to TF Ident.ogg",
+                    "Tank Chat Live DF.ogg",
                     "dummy.wav",
-                    "dummy.wav",
-                    "dummy.wav",
-                    "dummy.wav"
+                    "SFX - Bombardment.ogg",
+                    "SFX - Heavy Gunfire.ogg",
+                    "SFX - Light Gunfire.ogg",
+                    "SFX - Plane Flyby.ogg"
                 ],
                 "1": [
                     "dummy.wav",
@@ -782,7 +782,7 @@
         "Playlist 4 2021.mp3",
         "Playlist 5 2021.mp3",
         "Playlist 6 2021.mp3",
-        "underscore.mp3",
+        "Playlist 7 2021.mp3",
         "underscore.mp3"
     ]
 }

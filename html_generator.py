@@ -50,7 +50,7 @@ def generate_audio_players(audio_file_list, mode, current_class):
 def create_title_row(audio_file_list, current_class):
     html_output = f"<tr class=color_{current_class}>"
     for audio_file in audio_file_list:
-        html_output += f"<td>{audio_file}</td>"
+        html_output += f"<td>{audio_file.split('.')[0]}</td>"
     html_output += "</tr>"
     return html_output
 
@@ -72,7 +72,11 @@ def generate_html_start():
 
 
 def generate_html_title(pages_dict, current_sample_set):
-    return f"<h1 class='text-center'>{pages_dict[current_sample_set]}</h1>"
+    header_text = f"<h1 class='text-center'>{pages_dict[current_sample_set]}</h1><div class='container'>"
+    for k, v in pages_dict.items():
+        header_text += f"<a href='{v}.html'>{k}</a> "
+    header_text += "</div>"
+    return header_text
 
 
 def generate_html_end():

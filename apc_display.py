@@ -78,7 +78,7 @@ def draw_button(x_loc, y_loc, button_size, percentage, name, state):
     # handling of Q numbers to be larger in buttons
     offset = 0
     if len(name) > 0:
-        if name.split()[0][0] == "Q":
+        if len(name.split()[0]) == 3:
             text = medArial.render(name.split()[0], True, WHITE)
             screen.blit(text, (x_loc + 3, y_loc + 3))
             name = " ".join(name.split()[1:])
@@ -175,7 +175,6 @@ while True:
     # TODO: selection of grid buttons from keyboard
     # TODO: display of current sound set on screen
     # TODO: turn off button at the end of soundtrack playback...
-    # TODO: Large Q labels for Q samples.
 
     # text display of current sample set
     text = largeArial.render(page_name, True, WHITE)
