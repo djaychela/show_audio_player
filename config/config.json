@@ -8,7 +8,7 @@
                     "007 theme.wav",
                     "Welcome to TF Ident.ogg",
                     "Tank Chat Live DF.ogg",
-                    "dummy.wav",
+                    "ANN - Long Bed.ogg",
                     "SFX - Bombardment.ogg",
                     "SFX - Heavy Gunfire.ogg",
                     "SFX - Light Gunfire.ogg",
@@ -88,17 +88,17 @@
         },
         {
             "PageNumber": 2,
-            "PageName": "Samples 2",
+            "PageName": "British Army Display",
             "Samples": {
                 "0": [
+                    "ACD - Thunderstruck.ogg",
                     "dummy.wav",
                     "dummy.wav",
                     "dummy.wav",
-                    "dummy.wav",
-                    "dummy.wav",
-                    "dummy.wav",
-                    "dummy.wav",
-                    "dummy.wav"
+                    "SFX - Bombardment.ogg",
+                    "SFX - Heavy Gunfire.ogg",
+                    "SFX - Light Gunfire.ogg",
+                    "SFX - Plane Flyby.ogg"
                 ],
                 "1": [
                     "dummy.wav",
@@ -776,13 +776,13 @@
         }
     ],
     "SoundtrackList": [
-        "Playlist 1 2021.mp3",
-        "Playlist 2 2021.mp3",
-        "Playlist 3 2021.mp3",
-        "Playlist 4 2021.mp3",
-        "Playlist 5 2021.mp3",
-        "Playlist 6 2021.mp3",
-        "Playlist 7 2021.mp3",
+        "Playlist 1 2021 SB.mp3",
+        "Playlist 2 2021 SB.mp3",
+        "Playlist 3 2021 SB.mp3",
+        "Playlist 4 2021 SB.mp3",
+        "Playlist 5 2021 SB.mp3",
+        "Playlist 6 2021 SB.mp3",
+        "Playlist 7 2021 SB.mp3",
         "underscore.mp3"
     ]
 }

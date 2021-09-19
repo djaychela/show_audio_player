@@ -236,11 +236,12 @@ while True:
         if event.type == pygame.KEYDOWN:
             if 49 <= event.key <= 57:
                 current_sample_set = event.key - 48
-            samples_list, soundtrack_list, pages_dict, page_name = parse_config_data(
-                config_data, current_sample_set
-            )
-            load_buttons()
+                samples_list, soundtrack_list, pages_dict, page_name = parse_config_data(
+                    config_data, current_sample_set
+                )
+                load_buttons()
             if event.key == pygame.K_u:
                 samples_list, soundtrack_list, pages_dict, page_name, config_data = load_config()
-
+                load_buttons()
+                
     pygame.display.update()
