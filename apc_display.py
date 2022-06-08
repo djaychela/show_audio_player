@@ -49,8 +49,8 @@ pygame.mixer.set_num_channels(99)
 print("Initialising fonts...")
 tinyArial = pygame.font.SysFont("arial", 15)
 smallArial = pygame.font.SysFont("arial", 25)
-medArial = pygame.font.SysFont("arial", 40)
-largeArial = pygame.font.SysFont("arial", 65)
+medArial = pygame.font.SysFont("arial", 30)
+largeArial = pygame.font.SysFont("arial", 40)
 print("Fonts initialized!")
 
 
@@ -79,7 +79,7 @@ def draw_button(x_loc, y_loc, button_size, percentage, name, state):
     offset = 0
     if len(name) > 0:
         if len(name.split()[0]) == 3:
-            text = medArial.render(name.split()[0], True, WHITE)
+            text = smallArial.render(name.split()[0], True, GREEN)
             screen.blit(text, (x_loc + 3, y_loc + 3))
             name = " ".join(name.split()[1:])
             offset = 25
@@ -87,7 +87,11 @@ def draw_button(x_loc, y_loc, button_size, percentage, name, state):
     if len(name) > 0:
         for t in name.split()[:3]:
             if t != '-':
+                text_length = len(t)
                 text = tinyArial.render(t, True, WHITE)
+                while text.get_width() > button_size - 8:
+                    text_length -=1
+                    text = tinyArial.render(t[:text_length], True, WHITE)
                 screen.blit(text, (x_loc + 3, y_loc + 3 + offset))
                 offset += 15
 
@@ -175,6 +179,7 @@ while True:
     # TODO: selection of grid buttons from keyboard
     # TODO: display of current sound set on screen
     # TODO: turn off button at the end of soundtrack playback...
+    # TODO: catch pygame.error for no such file
 
     # text display of current sample set
     text = largeArial.render(page_name, True, WHITE)

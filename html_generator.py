@@ -72,9 +72,15 @@ def generate_html_start():
 
 
 def generate_html_title(pages_dict, current_sample_set):
-    header_text = f"<h1 class='text-center'>{pages_dict[current_sample_set]}</h1><div class='container'>"
+    header_text = (f"<h1 class='text-center'>{pages_dict[current_sample_set]}</h1><div class='container'>"
+        "<header class='d-flex justify-content-center py-3'>"
+        "<ul class='nav nav-pills'>")
+
     for k, v in pages_dict.items():
-        header_text += f"<a href='{v}.html'>{k}</a> "
+        if k == current_sample_set:
+            header_text += f"<li class='nav-item'><a href='{v}.html' class='nav-link active' aria-current='page'>{k} - {v}</a></li>"
+        else:
+            header_text += f"<li class='nav-item'><a href='{v}.html' class='nav-link'>{k} - {v}</a></li>"
     header_text += "</div>"
     return header_text
 

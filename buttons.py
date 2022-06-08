@@ -115,9 +115,14 @@ class PlaylistButton(Button):
 
     def audio_output(self):
         if self.state:
-            pygame.mixer.music.load(self.audio_file)
-            pygame.mixer.music.play()
-            self.start_time = time.time()
+            try:
+                pygame.mixer.music.load(self.audio_file)
+                pygame.mixer.music.play()
+                self.start_time = time.time()
+            except pygame.error:
+                print(f"Soundtrack file missing: {self.audio_file}")
+                self.start_time = 0
+                self.state = False
         else:
             try:
                 pygame.mixer.music.fadeout(2000)
