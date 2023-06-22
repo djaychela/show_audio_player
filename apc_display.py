@@ -12,12 +12,16 @@ config_file = "config.json"
 button_size = 70
 warning_limit = 0.9
 current_sample_set = 1
+current_row = 0
+current_playlist = 0
+VOLUME_INCREMENT = 5
 
 # colours for display
 BLACK = (0, 0, 0)
 GREY = (80, 80, 80)
 WHITE = (255, 255, 255)
 GREEN = (0, 255, 0)
+GREEN_MID = (0, 127, 0)
 RED = (255, 0, 0)
 FPS = 15
 
@@ -54,10 +58,12 @@ largeArial = pygame.font.SysFont("arial", 40)
 print("Fonts initialized!")
 
 
-def draw_button(x_loc, y_loc, button_size, percentage, name, state):
-
-    pygame.draw.rect(screen, WHITE, (x_loc, y_loc, button_size, button_size))
-    if state:
+def draw_button(x_loc, y_loc, button_size, percentage, name, state, active):
+    if active:
+        pygame.draw.rect(screen, GREEN_MID, (x_loc, y_loc, button_size, button_size))
+    else:
+        pygame.draw.rect(screen, WHITE, (x_loc, y_loc, button_size, button_size))
+    if state:        
         pygame.draw.rect(
             screen, GREY, (x_loc + 2, y_loc + 2, button_size - 4, button_size - 4)
         )
@@ -133,6 +139,9 @@ index_1 = [idx for idx in range(64)]
 index_2 = [idx for idx in range(82, 90)]
 indexes = index_1 + index_2
 
+keys_3 = [pygame.K_q, pygame.K_w, pygame.K_e, pygame.K_r, pygame.K_t, pygame.K_y, pygame.K_u, pygame.K_i]
+keys_2 = [pygame.K_a, pygame.K_s, pygame.K_d, pygame.K_f, pygame.K_g, pygame.K_h, pygame.K_j, pygame.K_k, pygame.K_l]
+keys_1 = [pygame.K_z, pygame.K_x, pygame.K_c, pygame.K_v, pygame.K_b, pygame.K_n, pygame.K_m, pygame.K_COMMA, pygame.K_PERIOD]
 # initialisation of buttons
 samples_list, soundtrack_list, pages_dict, page_name, config_data = load_config()
 load_buttons()
@@ -180,6 +189,18 @@ while True:
     # TODO: display of current sound set on screen
     # TODO: turn off button at the end of soundtrack playback...
     # TODO: catch pygame.error for no such file
+    # TODO: allow file paths to include folders (name needs to be separated)
+    # TODO: move all drawing functions to graphics.py
+    # TODO: make all drawing functions scalable
+    # TODO: make buttons have location index as part of creation (so it's calculated once, not every time)
+    # TODO: add location calculation to button init method
+    # TODO: add draw method to button
+    # TODO: Load all buttons and switch between to avoid delay when changing scenes
+    # TODO: Use pathlib for path access
+    # TODO: Add pause button for playlists
+    # TODO: Add duration display for playlists
+    
+
 
     # text display of current sample set
     text = largeArial.render(page_name, True, WHITE)
@@ -205,6 +226,7 @@ while True:
             buttons[idx].percentage_played(),
             buttons[idx].friendly_name,
             current_state[idx],
+            idx // 8 == current_row
         )
 
     # playlist button display
@@ -220,6 +242,7 @@ while True:
             buttons[idx + 82].percentage_played(),
             buttons[idx + 82].friendly_name,
             current_state[idx + 82],
+            idx == current_playlist
         )
 
     # volume slider display
@@ -245,8 +268,39 @@ while True:
                     config_data, current_sample_set
                 )
                 load_buttons()
-            if event.key == pygame.K_u:
+            if event.key == pygame.K_EQUALS:
                 samples_list, soundtrack_list, pages_dict, page_name, config_data = load_config()
                 load_buttons()
+
+            if event.key == pygame.K_UP:
+                if current_row < 7:
+                    current_row +=1
+            if event.key == pygame.K_DOWN:
+                if current_row > 0:
+                    current_row -=1
+
+            if event.key == pygame.K_RIGHT:
+                if current_playlist < 7:
+                    current_playlist +=1
+            if event.key == pygame.K_LEFT:
+                if current_playlist > 0:
+                    current_playlist -=1
+
+            if event.key == pygame.K_p:
+                playlist_idx = current_playlist + 82
+                turn_off_other_soundtracks(playlist_idx)
+                buttons[playlist_idx].toggle_state()
                 
+
+            if event.key in keys_3:
+                buttons[keys_3.index(event.key) + 8 * current_row].toggle_state()
+            if event.key in keys_2:
+                channels[keys_2.index(event.key)] += VOLUME_INCREMENT
+                channels[keys_2.index(event.key)] = min(channels[keys_2.index(event.key)], 100)
+            if event.key in keys_1:
+                channels[keys_1.index(event.key)] -= VOLUME_INCREMENT
+                channels[keys_1.index(event.key)] = max(channels[keys_1.index(event.key)], 0)
+
     pygame.display.update()
+
+    # print(channels)

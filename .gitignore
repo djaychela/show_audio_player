@@ -112,6 +112,7 @@ venv/
 ENV/
 env.bak/
 venv.bak/
+v2/
 
 # Spyder project settings
 .spyderproject
@@ -149,3 +150,5 @@ audio/
 playlists/
 html_output/bootstrap/
 html_output/*
+
+python-rtmidi-1.5.2/

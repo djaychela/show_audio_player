@@ -35,7 +35,7 @@ def generate_audio_players(audio_file_list, mode, current_class):
 
     player_html += f"<tr class=color_player_{current_class}>"
     for idx, soundtrack in enumerate(audio_file_list):
-        file_path = os.path.join(os.getcwd(), mode, soundtrack)
+        file_path = os.path.join("..", mode, soundtrack)
         player_audio = f"""<td>
         <audio controls>
     <source src="{file_path}" type="audio/mpeg">
@@ -148,3 +148,7 @@ for page_num, page_name in pages_dict.items():
     )
 
     create_output_file(f"{page_name}.html", html_output)
+
+# TODO: Output all files to new folder - HTML and linked audio files
+# TODO: Add day name into output process (for folder and page titles)
+
